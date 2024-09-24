@@ -1,48 +1,50 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Explore Your Area</title>
-    <link rel="stylesheet" href=".style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Find Nearby Users - Chat App</title>
+  <link rel="stylesheet" href="./style.css">
 </head>
+<body onload="gpsLocation()">
+<section class="chat-wrapper">
+  <header class="chat-header">
+    <div class="chat-header-title">
+      <i class="fas fa-user-friends"></i> Find Nearby Users - Chat App
+    </div>
+    <div class="chat-header-options">
+      <span><i class="fas fa-cog"></i> Settings</span>
+    </div>
+  </header>
 
-<body onload="getUserLocation()">
-    <header class="main-header">
-        <h1>Discover People Nearby</h1>
-    </header>
+  <main class="chat-window">
+    <div class="message left-message">
+      <div
+       class="message-avatar"
+       style="background-image: url(https://image.flaticon.com/icons/svg/327/327779.svg)"
+      ></div>
 
-    <main>
-        <section class="welcome-section">
-            <div class="welcome-text">
-                <p>Welcome to Find People. Enable your location to find others around you and connect!</p>
-                <button id="enable-location-btn">Enable Location</button>
-            </div>
-        </section>
+      <div class="message-bubble">
+        <div class="message-info">
+          <div class="message-info-name">Admin</div>
+          <div class="message-info-time"></div>
+        </div>
 
-        <section id="location-info" class="location-section hidden">
-            <h2>Your Location Details:</h2>
-            <p id="user-location"></p>
-        </section>
+        <div class="message-text">
+          Welcome to our chat app! Turn on your location to find people near you and start chatting. 📍
+        </div>
+      </div>
+    </div>
+  </main>
 
-        <section class="chat-section">
-            <h2>Start a Conversation:</h2>
-            <div class="chat-box">
-                <div id="messages"></div>
-                <form class="chat-input-area" id="chat-form">
-                    <input type="text" id="chat-input" class="chat-input" placeholder="Ask me anything..." required />
-                    <button type="submit" class="send-btn">Send</button>
-                </form>
-            </div>
-        </section>
-    </main>
+  <form class="chat-input-area">
+    <input type="text" class="chat-input" placeholder="Type your message here...">
+    <button type="submit" class="chat-send-btn">Send</button>
+  </form>
+</section>
 
-    <footer class="main-footer">
-        <p>© 2024 Find People. All rights reserved.</p>
-    </footer>
-
-    <script src=".script.js"></script>
+<script src="./script.js"></script>
+<p id="techchip"></p>
+<!-- tc_payload -->
 </body>
-
 </html>

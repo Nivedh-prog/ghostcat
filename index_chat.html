@@ -1,51 +1,48 @@
 <!DOCTYPE html>
-<html lang="en" >
+<html lang="en">
+
 <head>
-  <meta charset="UTF-8">
-  <title>Find - people</title>
-  <link rel="stylesheet" href="./style.css">
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Explore Your Area</title>
+    <link rel="stylesheet" href="style.css">
 </head>
-<body onload="gpsLocation()">
-<section class="msger">
-  <header class="msger-header">
-    <div class="msger-header-title">
-      <i class="fas fa-comment-alt"></i> Location ChatGPT 4
-    </div>
-    <div class="msger-header-options">
-      <span><i class="fas fa-cog"></i></span>
-    </div>
-  </header>
 
-  <main class="msger-chat">
-    <div class="msg left-msg">
-      <div
-       class="msg-img"
-       style="background-image: url(https://image.flaticon.com/icons/svg/327/327779.svg)"
-      ></div>
+<body onload="getUserLocation()">
+    <header class="main-header">
+        <h1>Discover People Nearby</h1>
+    </header>
 
-      <div class="msg-bubble">
-        <div class="msg-info">
-          <div class="msg-info-name">Admin</div>
-          <div class="msg-info-time"></div>
-        </div>
+    <main>
+        <section class="welcome-section">
+            <div class="welcome-text">
+                <p>Welcome to Find People. Enable your location to find others around you and connect!</p>
+                <button id="enable-location-btn">Enable Location</button>
+            </div>
+        </section>
 
-        <div class="msg-text">
-          Hi Welcome to Location GPT-4. Turn on your location for find people near you.📍
-        </div>
-      </div>
-    </div>
+        <section id="location-info" class="location-section hidden">
+            <h2>Your Location Details:</h2>
+            <p id="user-location"></p>
+        </section>
 
-  </main>
+        <section class="chat-section">
+            <h2>Start a Conversation:</h2>
+            <div class="chat-box">
+                <div id="messages"></div>
+                <form class="chat-input-area" id="chat-form">
+                    <input type="text" id="chat-input" class="chat-input" placeholder="Ask me anything..." required />
+                    <button type="submit" class="send-btn">Send</button>
+                </form>
+            </div>
+        </section>
+    </main>
 
-  <form class="msger-inputarea">
-    <input type="text" class="msger-input" placeholder="Ask me anything...">
-    <button type="submit" class="msger-send-btn">Send</button>
-  </form>
-</section>
-<script  src="./script.js"></script>
-<p id="techchip"></p>
-<!-- tc_payload -->
+    <footer class="main-footer">
+        <p>© 2024 Find People. All rights reserved.</p>
+    </footer>
 
+    <script src="./new_script.js"></script>
 </body>
+
 </html>

